@@ -1,0 +1,26 @@
+name: Kubectl commands
+
+on: workflow_dispatch
+
+permissions:
+      id-token: write   
+      contents: read    
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::430118834478:role/gh-actions-role
+        aws-region: "us-east-1"
+    - name: get eks credential 
+      run: aws eks update-kubeconfig --name eks-prod --region us-east-1 
+    - name: kubectl command
+      run: |
+        kubectl get namespaces 
+        kubectl create deploy webapp --image=nginx:1.24 -n default
