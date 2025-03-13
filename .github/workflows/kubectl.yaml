@@ -1,6 +1,10 @@
 name: Kubectl commands
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
       id-token: write   
@@ -30,7 +34,7 @@ jobs:
           --namespace arc-runners \
           --create-namespace \
           --set githubConfigUrl="https://github.com/tcslabsfjbs" \
-          --set githubConfigSecret.github_token="${{ secret.GH_PAT }}" \
+          --set githubConfigSecret.github_token="${{ secrets.GH_PAT }}" \
           oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
         kubectl get po -A
         kubect get ns 
