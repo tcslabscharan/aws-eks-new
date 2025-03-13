@@ -23,4 +23,14 @@ jobs:
     - name: kubectl command
       run: |
         kubectl get namespaces 
-        kubectl get configmap aws-auth -n kube-system -o json | jq '.data.mapUsers += [{"userarn": "arn:aws:iam::430118834478:user/eks16", "username": "eks16", "groups": ["system:masters"]}]' | kubectl apply -f -
+        helm install arc \
+         --namespace arc-systems \
+         --create-namespace \
+         oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+        helm install arc-runner-set \
+          --namespace arc-runners \
+          --create-namespace \
+          --set githubConfigUrl="https://github.com/tcslabsfjbs" \
+          --set githubConfigSecret.github_token="${{ secret.GH_PAT }}" \
+          oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+        
