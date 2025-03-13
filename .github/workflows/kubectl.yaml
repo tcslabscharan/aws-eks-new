@@ -22,7 +22,6 @@ jobs:
       run: aws eks update-kubeconfig --name eks-prod --region us-east-1 
     - name: kubectl command
       run: |
-        kubectl get namespaces 
         helm install arc \
          --namespace arc-systems \
          --create-namespace \
@@ -33,4 +32,6 @@ jobs:
           --set githubConfigUrl="https://github.com/tcslabsfjbs" \
           --set githubConfigSecret.github_token="${{ secret.GH_PAT }}" \
           oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+        kubectl get po -A
+        kubect get ns 
         
