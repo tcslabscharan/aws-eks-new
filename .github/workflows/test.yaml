@@ -23,7 +23,35 @@ jobs:
         aws-region: "us-east-1"
     - name: get eks credential 
       run: aws eks update-kubeconfig --name eks-prod --region us-east-1 
-    - name: kubectl command
+    - name: Add user as cluster-admin
       run: |
-         kubectl get cm aws-auth -n kube-system -o yaml
+        # Create a ClusterRoleBinding yaml file
+        cat <<EOF > cluster-admin-binding.yaml
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: user-cluster-admin
+        subjects:
+        - kind: User
+          name: arn:aws:iam::430118834478:user/eks16  # Replace with actual user ARN
+          apiGroup: rbac.authorization.k8s.io
+        roleRef:
+          kind: ClusterRole
+          name: cluster-admin
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+    
+        # Apply the ClusterRoleBinding
+        kubectl apply -f cluster-admin-binding.yaml
+    
+        # Add the user to aws-auth ConfigMap
+        kubectl get configmap aws-auth -n kube-system -o yaml > aws-auth.yaml
+    
+        wget -q https://github.com/mikefarah/yq/releases/download/v4.30.6/yq_linux_amd64 -O /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+    
+        # Add the user to mapUsers section
+        yq e '.data.mapUsers = (.data.mapUsers // "") + "- userarn: arn:aws:iam::430118834478:user/eks16\n  username: username\n  groups:\n  - system:masters\n"' -i aws-auth.yaml
+    
+        # Apply the updated ConfigMap
+        kubectl apply -f aws-auth.yaml
         
