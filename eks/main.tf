@@ -243,7 +243,14 @@ resource "aws_eks_cluster" "main" {
     endpoint_public_access  = true
     security_group_ids      = [aws_security_group.eks_cluster.id]
   }
-
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
+  }
+  kubernetes_network_config {
+    elastic_load_balancing {
+      enabled = true
+    }
+  }
   # Ensure IAM role permissions are created before the cluster
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy
