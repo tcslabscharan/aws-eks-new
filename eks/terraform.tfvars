@@ -1,6 +1,6 @@
 # Network configuration
 vpc_cidr   = "192.168.0.0/16" # Different from default to show customization
-aws_region = "us-east-1"   # AWS region for resource creation
+aws_region = "us-east-1"      # AWS region for resource creation
 
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
@@ -20,6 +20,11 @@ public_subnet_cidrs = {
 eks_node_size      = "t3.medium" # Size of the EKS node pool instances
 eks_node_disk_size = 40          # EKS node disk size in GB
 cluster_name       = "eks-prod"
+
+# Add IAM users/roles as cluster admins
+eks_admin_arns = [
+  "arn:aws:iam::430118834478:user/eks16"
+]
 
 # Fargate configuration
 fargate_namespaces = ["fargate-system", "default", "arc-runners"]

@@ -8,6 +8,14 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.36.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4.0"
+    }
   }
   backend "s3" {
     bucket = "tcslabsfjbs"
@@ -243,15 +251,13 @@ resource "aws_eks_cluster" "main" {
     endpoint_public_access  = true
     security_group_ids      = [aws_security_group.eks_cluster.id]
   }
+
   access_config {
     authentication_mode = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
   }
-  kubernetes_network_config {
-    elastic_load_balancing {
-      enabled = true
-    }
-  }
-  # Ensure IAM role permissions are created before the cluster
+
+   # Ensure IAM role permissions are created before the cluster
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy
   ]
@@ -492,7 +498,7 @@ resource "aws_eks_addon" "efs_csi" {
 resource "aws_eks_addon" "pod_identity_agent" {
   cluster_name  = aws_eks_cluster.main.name
   addon_name    = "eks-pod-identity-agent"
-  addon_version = "v1.3.4-eksbuild.1"  # Check latest version
+  addon_version = "v1.3.4-eksbuild.1" # Check latest version
 
   depends_on = [
     aws_eks_node_group.main

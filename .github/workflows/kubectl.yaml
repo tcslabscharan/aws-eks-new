@@ -7,7 +7,7 @@ permissions:
       id-token: write   
       contents: read    
 jobs:
-  terraform:
+  kubectl-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,6 +33,4 @@ jobs:
           --set githubConfigUrl="https://github.com/tcslabsfjbs" \
           --set githubConfigSecret.github_token="${{ secrets.GH_PAT }}" \
           oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-        kubectl get po -A
-        kubectl get ns 
-        
+        sleep 10 && kubectl get po -A       

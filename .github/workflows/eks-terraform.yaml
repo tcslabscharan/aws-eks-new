@@ -1,6 +1,13 @@
 name: EKS Terraform Deployment
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      destroy:
+        description: 'Destroy infrastructure'
+        required: true
+        default: 'false'
+        type: boolean
 
 permissions:
       id-token: write   
@@ -33,5 +40,27 @@ jobs:
     - name: Terraform Plan
       run: terraform plan -no-color
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve -destroy
+    - name: Terraform Apply or Destroy
+      run: |
+        if [[ "${{ github.event.inputs.destroy }}" == "true" ]]; then
+          echo "Destroying infrastructure..."
+          terraform apply -auto-approve -destroy
+        else
+          echo "Applying infrastructure..."
+          terraform apply -auto-approve
+          sleep 15
+          
+          # Configure kubectl with cluster credentials
+          echo "Configuring kubectl..."
+          eval "$(terraform output -raw kubectl_config_command)"
+          
+          # Apply the aws-auth ConfigMap using the output command
+          echo "Applying aws-auth ConfigMap..."
+          eval "$(terraform output -raw apply_auth_config_cmd)"
+          
+          # Verify the ConfigMap was applied
+          echo "Verifying aws-auth ConfigMap..."
+          kubectl get configmap aws-auth -n kube-system
+          
+          echo "EKS cluster deployment complete!"
+        fi
