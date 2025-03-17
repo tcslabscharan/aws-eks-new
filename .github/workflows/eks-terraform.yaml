@@ -60,7 +60,7 @@ jobs:
           
           # Verify the ConfigMap was applied
           echo "Verifying aws-auth ConfigMap..."
-          kubectl get configmap aws-auth -n kube-system
+          kubectl get configmap aws-auth -n kube-system -o yaml
           
           echo "EKS cluster deployment complete!"
         fi
